@@ -11,6 +11,9 @@ DELTA = {  #移動量辞書、(押下キー:移動量タプル)
     pg.K_LEFT : (-5,0),
     pg.K_RIGHT : (+5,0),
 }
+
+
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
@@ -26,6 +29,17 @@ def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate 
 
+
+def time():
+    new_lst = []
+    accs = [a for a in range(1,11)]
+
+    for r in range(1,11):
+        bb_img = pg.Surface((20*r,20*r))
+        bb_img.set_colorkey((0,0,0))
+        pg.draw.circle(bb_img,(255,0,0),(10*r,10*r),10*r)
+        new_lst.append(bb_img)
+    return accs , new_lst
     
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -36,15 +50,15 @@ def main():
     kk_rct = kk_img.get_rect()
     kk_rct.center = 900, 400
     # ここから爆弾の設定
-    bd_img = pg.Surface((20,20))
-    bd_img.set_colorkey((0,0,0))
-    pg.draw.circle(bd_img,(255,0,0),(10,10),10)
-    bd_rct = bd_img.get_rect()
+    accs, new_lst = time()
+    bb_img = new_lst[0]
+    bd_rct = bb_img.get_rect()
     bd_rct.center = random.randint(0,WIDTH),random.randint(0,HEIGHT)
     vx,vy = +5,+5 #横方向速度,縦方向速度
 
     clock = pg.time.Clock()
     tmr = 0
+ 
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -65,9 +79,12 @@ def main():
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
-        #爆弾の移動と表示
-        bd_rct.move_ip(vx,vy)
-        screen.blit(bd_img,bd_rct)
+        #爆弾の移動と表示 avx = vx * accs[min(tmr//500, 9)]
+        avx = vx * accs[min(tmr//500, 9)]
+        avy = vy * accs[min(tmr//500, 9)]
+        bd_rct.move_ip(avx,avy)
+        bb_img = new_lst[min(tmr//500, 9)]
+        screen.blit(bb_img,bd_rct)
         yoko, tate = check_bound(bd_rct)
         if not yoko:
             vx *= -1
